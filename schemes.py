@@ -55,7 +55,7 @@ def LeapfrogStep(r0s, v0s, h, G, masses):
     v1s = vs_half + 0.5 * dv_dt(r1s, G, masses) * h
     return r1s, v1s
 
-def ForestRuth(r0s, v0s, h, G, masses):
+def Leapfrog4Step(r0s, v0s, h, G, masses):
     '''
     One step of the standard leapfrog method
     
