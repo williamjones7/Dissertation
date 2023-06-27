@@ -136,7 +136,7 @@ def KineticEnergy(vs, masses):
 
 def PE(rs, i, G, masses):
     '''
-    Total kinetic energy of particle i. E_p = - ||F_i|| * ||r_i||
+    Total potential energy of particle i. E_p = - ||F_i|| * ||r_i||
     
     input: - rs:     position of each particle
            - i:      particle to find force on
@@ -153,7 +153,7 @@ def PE(rs, i, G, masses):
 
 def PotentialEnergy(rs, G, masses):
     '''
-    Total kinetic energy of each particle. E_p = - ||F_i|| * ||r_i||
+    Total potential energy of each particle. E_p = - ||F_i|| * ||r_i||
     
     input: - rs:     position of each particle
            - G:      gravitational constant
@@ -238,7 +238,7 @@ def AngMomentumDiff(am_traj):
     
     input: - am_traj: trajectory of angular momentum of each particle
            
-    output: - dl:      trajectory of change in angular momentum from initial angular momentum
+    output: - dL:      trajectory of change in angular momentum from initial angular momentum
     '''
         
     Lt = np.sum(am_traj, axis = 1) # total angular momentum of the system
@@ -250,5 +250,5 @@ def AngMomentumDiff(am_traj):
     if L0hat == 0: L0hat = 1
         
     # scale schange in angular momentum
-    dl = np.abs(Lt - L0) / np.abs(L0hat)
-    return dl
+    dL = np.abs(Lt - L0) / np.abs(L0hat)
+    return dL
