@@ -64,6 +64,16 @@ def dv_dt(rs, G, masses):
     Fs = Force(rs, G, masses)
     return np.divide(Fs, masses[:, np.newaxis])
 
+def w_to_vec(w):
+    ''' Transforms flat 1D vector to position and velocity vectors'''
+    W = np.reshape(w, (len(w) // 3, 3))
+    rs, vs = np.split(W, 2) 
+    return rs, vs
+
+def vec_to_w(rs, vs):
+    ''' Transforms positions and velocities to a flat 1D vector'''
+    return np.concatenate((rs.flatten(), vs.flatten()))
+    
 def all_derivatives(w, t, G, masses):
     '''
     Finds derivative, in every cardinal direction, of position and velocity of each particle
@@ -75,16 +85,20 @@ def all_derivatives(w, t, G, masses):
            
     output: flattened gradient of position and velocity
     '''
-    
-    W = np.reshape(w, (len(w) // 3, 3)) # store position and velocity in 3D
-    rs, vs = np.split(W, 2) # separate positions and velocities
+ 
+    rs, vs = w_to_vec(w) # separate positions and velocities
     
     drdt = dr_dt(vs) # find velocity of all particles
     dvdt = dv_dt(rs, G, masses) # find acceleration of all particles
     
-    derivs = np.concatenate((drdt,dvdt)).flatten() # reformat to be used by scipy integrate
+    derivs = vec_to_w(drdt, dvdt)
+    # derivs = np.concatenate((drdt,dvdt)).flatten() # reformat to be used by scipy integrate
     
     return derivs
+
+# ============================
+#         Reposition 
+# ============================
 
 def CentreOfMass(rs, vs, masses):
     '''
@@ -101,6 +115,23 @@ def CentreOfMass(rs, vs, masses):
     rcom = sum([rs[i] * masses[i] for i in range(len(masses))]) / np.sum(masses)
     vcom = sum([vs[i] * masses[i] for i in range(len(masses))]) / np.sum(masses)
     return rcom, vcom
+
+def Centralise(rs_traj, i):
+    '''
+    Position particle i at the centre of the system 
+    
+    input: - rs: position of each particle
+           - i:  particle to make centre  
+           
+    output: - rs: new position of each particle
+    '''
+    
+    ri = np.copy(rs_traj[:,i,:])
+    
+    for j in range(rs_traj.shape[1]):
+        rs_traj[:,j,:] -= ri
+        
+    return rs_traj
 
 # ============================
 #          Energy 
@@ -168,37 +199,61 @@ def PotentialEnergy(rs, G, masses):
     pes = [-1 * Fmags[i] *  rmags[i] for i in range(len(Fmags))]
     return np.array(pes)
 
-def EnergyDiff(ke_traj, pe_traj):
-    '''
-    Relative change in energy of the system over time
+# def EnergyError(ke_traj, pe_traj):
+#     '''
+#     Relative change in energy of the system over time, as a percentage of initial energy
     
-    input: - ke_traj: trajectory of kinetic energies of each particle
-           - pe_traj: trajectory of postential energies of each particle
+#     input: - ke_traj: trajectory of kinetic energies of each particle
+#            - pe_traj: trajectory of postential energies of each particle
            
-    output: - dE:      trajectory of energy difference from initial energy
-            - ke_traj: scaled kinetic energy trajectory 
-            - pe_traj: scaled potential energy trajectory 
-    '''
+#     output: - dE:      trajectory of energy difference from initial energy
+#             - ke_traj: scaled kinetic energy trajectory 
+#             - pe_traj: scaled potential energy trajectory 
+#     '''
     
-    total_ke = np.sum(ke_traj, axis = 1) # total kinetic energy of system
-    total_pe = np.sum(pe_traj, axis = 1) # total potential energy of system
-    Et = total_ke + total_pe # total energy of system
+#     total_ke = np.sum(ke_traj, axis = 1) # total kinetic energy of system
+#     total_pe = np.sum(pe_traj, axis = 1) # total potential energy of system
+#     Et = total_ke + total_pe # total energy of system
+#     E0 = Et[0] # initial energy 
+#     E0hat = E0 # scaling coefficient 
+    
+#     ## conditions to avoid dividing by zero 
+#     if E0hat == 0: E0hat = np.max(np.abs(kes[0]+pes[0])) 
+#     if E0hat == 0: E0hat = np.max(np.abs(kes[0]))
+#     if E0hat == 0: E0hat = np.max(np.abs(pes[0]))
+#     if E0hat == 0: E0hat = 1
+        
+#     # scale change in energy accross total, kinetic and potential energies 
+#     dE = (Et - E0) / np.abs(E0hat)
+#     kes = (total_ke - total_ke[0]) / np.abs(E0hat)
+#     pes = (total_pe - total_pe[0]) / np.abs(E0hat)
+    
+#     return dE, kes, pes
+
+def RelativeEnergy(E_traj):
+    '''
+    Relative change in energy of the system over time, as a percentage of initial energy
+    
+    input: - E_traj: trajectory of kenergies of each particle
+           
+    output: - dE:      trajectory of relative energy difference from initial energy
+    '''
+    Et = np.sum(E_traj, axis = 1)
     E0 = Et[0] # initial energy 
     E0hat = E0 # scaling coefficient 
     
     ## conditions to avoid dividing by zero 
-    if E0hat == 0: E0hat = np.max(np.abs(kes[0]+pes[0])) 
-    if E0hat == 0: E0hat = np.max(np.abs(kes[0]))
-    if E0hat == 0: E0hat = np.max(np.abs(pes[0]))
+    if E0hat == 0: E0hat = np.max(np.abs(E_traj[0])) 
     if E0hat == 0: E0hat = 1
-        
-    # scale change in energy accross total, kinetic and potential energies 
-    dE = (Et - E0) / np.abs(E0hat)
-    kes = (total_ke - total_ke[0]) / np.abs(E0hat)
-    pes = (total_pe - total_pe[0]) / np.abs(E0hat)
     
-    return dE, kes, pes
+    dE = np.abs(Et - E0) / np.abs(E0hat)
+    
+    return dE
 
+def TotalEnergy(rs, vs, G, masses):
+    ke = KineticEnergy(vs, masses)
+    pe = PotentialEnergy(rs, G, masses)
+    return ke + pe
 
 # ============================
 #      Angular Momentum
@@ -232,7 +287,7 @@ def AngMomentum(rs, vs, masses):
     L = [AM(rs, vs, i, masses) for i in range(len(masses))]
     return np.array(L)
 
-def AngMomentumDiff(am_traj):
+def RelativeAngMomentum(am_traj):
     '''
     Relative change in angular momentum of the system over time
     
