@@ -112,7 +112,7 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
 
     plt.tight_layout()
 
-def PlotEnergy(trajectories, schemeName, T, h):
+def PlotEnergy(trajectories):
     t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
 
     ### ENERGY ###
@@ -129,7 +129,7 @@ def PlotEnergy(trajectories, schemeName, T, h):
     plt.tight_layout()
 
 
-def PlotAngularMomentum(trajectories, schemeName, T, h):
+def PlotAngularMomentum(trajectories):
     t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
 
     ### ANGULAR MOMENTUM ###
@@ -142,5 +142,19 @@ def PlotAngularMomentum(trajectories, schemeName, T, h):
     
     ax.set_xlabel('Time', fontsize = 12)
     ax.set_ylabel('Relative Angular Momentum Error (%)', fontsize = 12)
+
+    plt.tight_layout()
+
+def PlotError(err_traj, trajectory):
+    t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectory
+
+    ### ENERGY ###
+    
+    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    
+    ax.plot(t_traj, err_traj, label = 'Total Energy')
+    
+    ax.set_xlabel('Time', fontsize = 12)
+    ax.set_ylabel('Absolute Error', fontsize = 12)
 
     plt.tight_layout()
