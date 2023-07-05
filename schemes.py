@@ -286,8 +286,8 @@ def run_scheme(scheme, t0, T, h, r0s, v0s, G, masses):
     am_traj = np.array(am_traj)
     
     # reposition centre of mass to origin with no momentum 
-    rs_traj += rcom
-    vs_traj += vcom
+    rs_traj = np.array([rs + rcom for rs in rs_traj])
+    vs_traj = np.array([vs + vcom for vs in vs_traj])
     
     return (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)
 
@@ -348,8 +348,8 @@ def run_scipy(t0, T, h, r0s, v0s, G, masses):
     am_traj = np.array(am_traj)
         
     # reposition centre of mass to origin with no momentum 
-    rs_traj += rcom
-    vs_traj += vcom
+    rs_traj = np.array([rs + rcom for rs in rs_traj])
+    vs_traj = np.array([vs + vcom for vs in vs_traj])
         
     return (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)
 
@@ -415,7 +415,7 @@ def run_adaptive_scheme(scheme, t0, T, h0, r0s, v0s, G, masses):
     am_traj = np.array(am_traj)
     
     # reposition centre of mass to origin with no momentum 
-    rs_traj += rcom
-    vs_traj += vcom
+    rs_traj = np.array([rs + rcom for rs in rs_traj])
+    vs_traj = np.array([vs + vcom for vs in vs_traj])
     
     return (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)

@@ -75,3 +75,72 @@ def plot2D(trajectories, masses, scheme='', style = 'default', COM = True):
     ax3.set_title(f'Relative angular momentum error using {scheme}', y = 1.05 )
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Percentage error')
+
+def PlotOrbits(trajectories, schemeName, T, h, masses):
+    t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
+    N = rs_traj.shape[1] # number of masses in the system
+
+    colours = plt.cm.rainbow(np.linspace(0,1,N)) # colour according to how many masses
+    
+    plt.style.use('default')
+
+    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+
+    # loop over all masses 
+    for i in range(N):
+        color = colours[i]
+        ri_traj = rs_traj[:,i,:] # get the i-th trajectory
+        vi_traj = vs_traj[:,i,:]
+        ax.plot(ri_traj[:,0], ri_traj[:,1],  zorder = 1, label=f'mass {i+1}', color=color) # plot the orbits
+        ax.scatter(ri_traj[0,0],ri_traj[0,1],marker="o", facecolor = 'white',s=50, zorder = 2, color=color) # plot the start positions
+        ax.scatter(ri_traj[-1,0],ri_traj[-1,1],marker="o",s=50, zorder = 2, color=color) # plot the start positions
+
+    # find and plot the centre of mass
+    rcoms = []
+    for i in range(rs_traj.shape[0]):
+        rcom, vcom = CentreOfMass(rs_traj[i], vs_traj[i], masses)
+        rcoms = rcoms + [rcom]
+    rcoms = np.array(rcoms)
+    ax.scatter(rcoms[:,0], rcoms[:,1], color = 'black', label = 'Centre of mass', marker = 'x', zorder = 3)
+
+    ax.set_aspect(aspect = 'equal')
+    ax.text(0.05, 1.05, f'{schemeName}: T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
+            va='top', fontsize = 12)
+    ax.set_xlabel('x-coordinate', fontsize = 12)
+    ax.set_ylabel('y-coordinate', fontsize = 12)
+    ax.legend()
+
+    plt.tight_layout()
+
+def PlotEnergy(trajectories, schemeName, T, h):
+    t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
+
+    ### ENERGY ###
+    
+    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    
+    relative_e_traj = RelativeEnergy(E_traj) *100
+    
+    ax.plot(t_traj, relative_e_traj, label = 'Total Energy')
+    
+    ax.set_xlabel('Time', fontsize = 12)
+    ax.set_ylabel('Relative Energy Error (%)', fontsize = 12)
+
+    plt.tight_layout()
+
+
+def PlotAngularMomentum(trajectories, schemeName, T, h):
+    t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
+
+    ### ANGULAR MOMENTUM ###
+    
+    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    
+    relative_am_traj = RelativeAngMomentum(am_traj[:,-1]) *100
+    
+    ax.plot(t_traj, relative_am_traj)
+    
+    ax.set_xlabel('Time', fontsize = 12)
+    ax.set_ylabel('Relative Angular Momentum Error (%)', fontsize = 12)
+
+    plt.tight_layout()
