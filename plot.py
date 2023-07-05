@@ -96,12 +96,12 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
         ax.scatter(ri_traj[-1,0],ri_traj[-1,1],marker="o",s=50, zorder = 2, color=color) # plot the start positions
 
     # find and plot the centre of mass
-    rcoms = []
-    for i in range(rs_traj.shape[0]):
-        rcom, vcom = CentreOfMass(rs_traj[i], vs_traj[i], masses)
-        rcoms = rcoms + [rcom]
-    rcoms = np.array(rcoms)
-    ax.scatter(rcoms[:,0], rcoms[:,1], color = 'black', label = 'Centre of mass', marker = 'x', zorder = 3)
+    # rcoms = []
+    # for i in range(rs_traj.shape[0]):
+    #     rcom, vcom = CentreOfMass(rs_traj[i], vs_traj[i], masses)
+    #     rcoms = rcoms + [rcom]
+    # rcoms = np.array(rcoms)
+    # ax.scatter(rcoms[:,0], rcoms[:,1], color = 'black', label = 'Centre of mass', marker = 'x', zorder = 3)
 
     ax.set_aspect(aspect = 'equal')
     ax.text(0.05, 1.05, f'{schemeName}: T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
