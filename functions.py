@@ -176,11 +176,15 @@ def PE(rs, i, G, masses):
            
     output: - pe: potential energy
     '''
-  
-    force_i = Force_i(rs, i, G, masses)
-    fmag = np.linalg.norm(force_i)
-    rmag = np.linalg.norm(rs[i])
-    return -fmag * rmag
+
+    ri = rs[i]
+    U = 0
+    for j, rj in enumerate(rs):
+        if i != j:
+            Uij = masses[i] * masses[j] / (np.linalg.norm(rj - ri))
+            U += Uij 
+    
+    return - G * U
 
 def PotentialEnergy(rs, G, masses):
     '''
@@ -192,11 +196,8 @@ def PotentialEnergy(rs, G, masses):
            
     output: - pe: potential energy
     '''
-        
-    Fs = Force(rs, G, masses)
-    Fmags = np.linalg.norm(Fs, axis = 1)
-    rmags = np.linalg.norm(rs, axis = 1)
-    pes = [-1 * Fmags[i] *  rmags[i] for i in range(len(Fmags))]
+
+    pes = [PE(rs, i, G, masses) for i in range(len(masses))]
     return np.array(pes)
 
 # def EnergyError(ke_traj, pe_traj):
