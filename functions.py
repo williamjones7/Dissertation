@@ -249,7 +249,7 @@ def RelativeEnergy(E_traj):
     
     dE = np.abs(Et - E0) / np.abs(E0hat)
     
-    return dE
+    return dE * 100
 
 def TotalEnergy(rs, vs, G, masses):
     ke = KineticEnergy(vs, masses)
@@ -307,4 +307,4 @@ def RelativeAngMomentum(am_traj):
         
     # scale schange in angular momentum
     dL = np.abs(Lt - L0) / np.abs(L0hat)
-    return dL
+    return dL * 100

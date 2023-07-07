@@ -119,7 +119,7 @@ def PlotEnergy(trajectories):
     
     fig, ax = plt.subplots(1, 1, figsize=(10,10))
     
-    relative_e_traj = RelativeEnergy(E_traj) *100
+    relative_e_traj = RelativeEnergy(E_traj) 
     
     ax.plot(t_traj, relative_e_traj, label = 'Total Energy')
     
@@ -136,7 +136,7 @@ def PlotAngularMomentum(trajectories):
     
     fig, ax = plt.subplots(1, 1, figsize=(10,10))
     
-    relative_am_traj = RelativeAngMomentum(am_traj[:,-1]) *100
+    relative_am_traj = RelativeAngMomentum(am_traj[:,-1]) 
     
     ax.plot(t_traj, relative_am_traj)
     
