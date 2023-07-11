@@ -183,8 +183,12 @@ def PE(rs, i, G, masses):
         if i != j:
             Uij = masses[i] * masses[j] / (np.linalg.norm(rj - ri))
             U += Uij 
+
+    f_mag = np.linalg.norm(Force_i(rs, i, G, masses))
+    r_mag = np.linalg.norm(rs[i])
     
-    return - G * U
+    U = - f_mag * r_mag
+    return U
 
 def PotentialEnergy(rs, G, masses):
     '''

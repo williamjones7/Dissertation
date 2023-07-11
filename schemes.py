@@ -175,11 +175,11 @@ def run_scheme(scheme, t0, T, h, r0s, v0s, G, masses):
     t = t0
     
     # Initialize our saved trajectories to be blank 
-    t_vals = []
-    rs_traj = [] 
-    vs_traj = [] 
-    E_traj = []
-    am_traj = []
+    t_vals = [t0]
+    rs_traj = [r0s] 
+    vs_traj = [v0s] 
+    E_traj = [TotalEnergy(r0s, v0s, G, masses)]
+    am_traj = [AngMomentum(r0s, v0s, masses)]
     
     times = time.time() - time.time()
     
@@ -210,6 +210,86 @@ def run_scheme(scheme, t0, T, h, r0s, v0s, G, masses):
     vs_traj = np.array([vs + vcom for vs in vs_traj])
     
     return (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)
+
+def run_scheme_debug(scheme, t0, T, h, r0s, v0s, G, masses):
+    '''
+    Evolution of the n-body problem using a numerical scheme.
+    
+    input: - scheme: numerical scheme to use
+           - t0:     starting time
+           - T:      time period 
+           - h:      timestep
+           - r0s:    starting position of each particle 
+           - v0s:    starting velocity of each particle 
+           - G:      gravitational constant
+           - masses: mass of each particle      
+           
+    output: - t_vals:  list of time values
+            - rs_traj: trajectory of positions of each particle 
+            - vs_traj: trajectory of velocity of each particle 
+            - E_traj: trajectory of energy of each particle 
+            - am_traj: trajectory of angular momentum of each particle 
+    '''
+    
+    # reposition centre of mass to origin with no momentum 
+    rcom, vcom = CentreOfMass(r0s, v0s, masses)
+    r0s -= rcom
+    v0s -= vcom
+    
+    # Set the number of steps; it is best if h is an integral fraction of T
+    Nsteps = int(T / h)
+    
+    # Make a copy of initial values
+    rs = np.copy(r0s)
+    vs = np.copy(v0s)
+    t = t0
+    
+    # Initialize our saved trajectories to be blank 
+    t_vals = [t0]
+    rs_traj = [r0s] 
+    vs_traj = [v0s] 
+    E_traj = [TotalEnergy(r0s, v0s, G, masses)]
+    am_traj = [AngMomentum(r0s, v0s, masses)]
+    ke_traj = [KineticEnergy(v0s, masses)]
+    pe_traj = [PotentialEnergy(r0s, G, masses)]
+    
+    times = time.time() - time.time()
+    
+    # run scheme for requried number of steps 
+    for _ in range(Nsteps):
+        t1 = time.time()
+        rs,vs = scheme(rs, vs, h, G, masses)  # Update step
+        times += time.time() - t1
+        E = TotalEnergy(rs, vs, G, masses)
+        ke = KineticEnergy(vs, masses)
+        pe = PotentialEnergy(rs, G, masses)
+        am = AngMomentum(rs, vs, masses) # Calculate angular momentum 
+        
+        ## append values to trajectories 
+        t = t + h
+        t_vals = t_vals + [t]
+        rs_traj = rs_traj + [rs] 
+        vs_traj = vs_traj + [vs]
+        E_traj = E_traj + [E]
+        am_traj = am_traj + [am]
+        ke_traj = ke_traj + [ke]
+        pe_traj = pe_traj + [pe]
+        
+    # Make trajectories into numpy arrays
+    rs_traj = np.array(rs_traj)
+    vs_traj = np.array(vs_traj) 
+    E_traj = np.array(E_traj)
+    am_traj = np.array(am_traj)
+    ke_traj = np.array(ke_traj)
+    pe_traj = np.array(pe_traj)
+    
+    # reposition centre of mass to origin with no momentum 
+    rs_traj = np.array([rs + rcom for rs in rs_traj])
+    vs_traj = np.array([vs + vcom for vs in vs_traj])
+
+    traj = (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)
+    
+    return traj, ke_traj, pe_traj 
 
 def run_scipy(t0, T, h, r0s, v0s, G, masses):
     '''
