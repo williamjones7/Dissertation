@@ -84,7 +84,7 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
     
     plt.style.use('default')
 
-    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    fig, ax = plt.subplots(1, 1, figsize=(7,7))
 
     # loop over all masses 
     for i in range(N):
@@ -104,11 +104,11 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
     # ax.scatter(rcoms[:,0], rcoms[:,1], color = 'black', label = 'Centre of mass', marker = 'x', zorder = 3)
 
     ax.set_aspect(aspect = 'equal')
-    ax.text(0.05, 1.05, f'{schemeName}: T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
-            va='top', fontsize = 12)
-    ax.set_xlabel('x-coordinate', fontsize = 12)
-    ax.set_ylabel('y-coordinate', fontsize = 12)
-    ax.legend()
+    ax.text(0.05, 0.95, f'T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
+            va='top', fontsize = 15)
+    ax.set_xlabel('x-coordinate', fontsize = 15)
+    ax.set_ylabel('y-coordinate', fontsize = 15)
+    ax.legend(fontsize = 15)
 
     plt.tight_layout()
 
@@ -117,7 +117,7 @@ def PlotEnergy(trajectories):
 
     ### ENERGY ###
     
-    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    fig, ax = plt.subplots(1, 1, figsize=(7,7))
     
     relative_e_traj = RelativeEnergy(E_traj) 
     
@@ -134,7 +134,7 @@ def PlotAngularMomentum(trajectories):
 
     ### ANGULAR MOMENTUM ###
     
-    fig, ax = plt.subplots(1, 1, figsize=(10,10))
+    fig, ax = plt.subplots(1, 1, figsize=(7,7))
     
     relative_am_traj = RelativeAngMomentum(am_traj[:,-1]) 
     

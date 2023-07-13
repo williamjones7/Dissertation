@@ -91,7 +91,7 @@ def RKF45Step(t0, r0s, v0s, h0, G, masses, tolerance = 1e-6, safety_factor = 0.9
     
     return t1, h1, r1s, v1s
 
-def run_adaptive_scheme(scheme, t0, T, h0, r0s, v0s, G, masses):
+def run_adaptive_scheme(scheme, t0, T, h0, r0s, v0s, G, masses, tolerance = 1e-3):
     '''
     Evolution of the n-body problem using an adaptive numerical scheme.
     
@@ -134,7 +134,7 @@ def run_adaptive_scheme(scheme, t0, T, h0, r0s, v0s, G, masses):
     # run scheme for requried number of steps 
     while t <= T:
         t1 = time.time()
-        t, h, rs, vs = scheme(t, rs, vs, h, G, masses)  # Update step
+        t, h, rs, vs = scheme(t, rs, vs, h, G, masses, tolerance)  # Update step
         times += time.time() - t1
         E = TotalEnergy(rs, vs, G, masses)
         am = AngMomentum(rs, vs, masses) # Calculate angular momentum 
@@ -206,6 +206,89 @@ def run_adaptive(scheme, t0, T, h0, r0s, v0s, G, masses, scaleh = 0.005):
         h = scaleh * findh(rs, vs)
         t += h
         times += time.time() - t1
+        E = TotalEnergy(rs, vs, G, masses)
+        am = AngMomentum(rs, vs, masses) # Calculate angular momentum 
+        
+        ## append values to trajectories 
+        t_vals = t_vals + [t]
+        rs_traj = rs_traj + [rs] 
+        vs_traj = vs_traj + [vs]
+        E_traj = E_traj + [E]
+        am_traj = am_traj + [am]
+        
+    # Make trajectories into numpy arrays
+    rs_traj = np.array(rs_traj)
+    vs_traj = np.array(vs_traj) 
+    E_traj = np.array(E_traj)
+    am_traj = np.array(am_traj)
+    
+    # reposition centre of mass to origin with no momentum 
+    rs_traj = np.array([rs + rcom for rs in rs_traj])
+    vs_traj = np.array([vs + vcom for vs in vs_traj])
+    
+    return (t_vals, rs_traj, vs_traj, E_traj, am_traj, times)
+
+
+
+def run_adaptive_symplectic(scheme, t0, T, h0, r0s, v0s, G, masses, scaleh = 0.005):
+    '''
+    Evolution of the n-body problem using an adaptive numerical scheme.
+    
+    input: - scheme: numerical scheme to use
+           - t0:     starting time
+           - T:      time period 
+           - h:      initial timestep
+           - r0s:    starting position of each particle 
+           - v0s:    starting velocity of each particle 
+           - G:      gravitational constant
+           - masses: mass of each particle      
+           
+    output: - t_vals:  list of time values
+            - rs_traj: trajectory of positions of each particle 
+            - vs_traj: trajectory of velocity of each particle 
+            - ke_traj: trajectory of kinetic energy of each particle 
+            - pe_traj: trajectory of potential energy of each particle 
+            - am_traj: trajectory of angular momentum of each particle 
+    '''
+    
+    # reposition centre of mass to origin with no momentum 
+    rcom, vcom = CentreOfMass(r0s, v0s, masses)
+    r0s -= rcom
+    v0s -= vcom
+    
+    # Make a copy of initial values
+    rs = np.copy(r0s)
+    vs = np.copy(v0s)
+    t = t0
+    h = h0
+    
+    # Initialize our saved trajectories to be blank 
+    t_vals = []
+    rs_traj = [] 
+    vs_traj = [] 
+    E_traj = []
+    am_traj = []
+    times = 0 
+    
+    rs, vs = scheme(rs, vs, h, G, masses) 
+    
+    # run scheme for requried number of steps 
+    while t <= T:
+        t1 = time.time()
+
+        h = scaleh * findh(rs, vs) # proposed timestep
+
+        rs_bar, vs_bar = scheme(rs, vs, h, G, masses)
+        h_bar = scaleh * findh(rs_bar, vs_bar) # proposed timestep
+
+        h_new = (h + h_bar) / 2
+        
+        rs, vs = scheme(rs, vs, h_new, G, masses)
+        
+        t += h_new
+
+        times += time.time() - t1
+
         E = TotalEnergy(rs, vs, G, masses)
         am = AngMomentum(rs, vs, masses) # Calculate angular momentum 
         
