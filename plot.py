@@ -76,7 +76,7 @@ def plot2D(trajectories, masses, scheme='', style = 'default', COM = True):
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Percentage error')
 
-def PlotOrbits(trajectories, schemeName, T, h, masses):
+def PlotOrbits(trajectories):
     t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
     N = rs_traj.shape[1] # number of masses in the system
 
@@ -92,8 +92,9 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
         ri_traj = rs_traj[:,i,:] # get the i-th trajectory
         vi_traj = vs_traj[:,i,:]
         ax.plot(ri_traj[:,0], ri_traj[:,1],  zorder = 1, label=f'mass {i+1}', color=color) # plot the orbits
-        ax.scatter(ri_traj[0,0],ri_traj[0,1],marker="o", facecolor = 'white',s=50, zorder = 2, color=color) # plot the start positions
-        ax.scatter(ri_traj[-1,0],ri_traj[-1,1],marker="o",s=50, zorder = 2, color=color) # plot the start positions
+        ax.scatter(ri_traj[0,0],ri_traj[0,1],marker="o",s=50, zorder = 2, color=color) # plot the start positions
+        # ax.scatter(ri_traj[-1,0],ri_traj[-1,1],marker="o",s=50, zorder = 2, color=color) # plot the start positions
+
 
     # find and plot the centre of mass
     # rcoms = []
@@ -104,8 +105,8 @@ def PlotOrbits(trajectories, schemeName, T, h, masses):
     # ax.scatter(rcoms[:,0], rcoms[:,1], color = 'black', label = 'Centre of mass', marker = 'x', zorder = 3)
 
     ax.set_aspect(aspect = 'equal')
-    ax.text(0.05, 0.95, f'T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
-            va='top', fontsize = 15)
+    # ax.text(0.05, 0.95, f'T = {T}, h = {h}, time = {np.round(time, 5)}', transform=ax.transAxes, 
+    #         va='top', fontsize = 15)
     ax.set_xlabel('x-coordinate', fontsize = 15)
     ax.set_ylabel('y-coordinate', fontsize = 15)
     ax.legend(fontsize = 15)
