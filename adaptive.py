@@ -10,10 +10,10 @@ import time
 
 def findh(rs, vs, h0 = np.inf):
     h = h0
-    for i, ri in enumerate(rs):
-        for j, rj in enumerate(rs):
-            if i != j:
-                r_mag = np.linalg.norm(ri - rj)
+    N = len(rs)
+    for i in range(N):
+        for j in range(i+1, N):
+                r_mag = np.linalg.norm(rs[i] - rs[j])
                 v_mag = np.linalg.norm(vs[i] - vs[j])
                 h = min(h, r_mag / v_mag)
     return h

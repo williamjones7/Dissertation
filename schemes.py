@@ -90,6 +90,25 @@ def PEFRLStep(r0s, v0s, h, G, masses):
     v5s = v4s
     
     return r5s, v5s
+
+def Optimised_FR_Step(r0s, v0s, h, G, masses):
+    p = + 0.1786178958448091E+00
+    l = - 0.2123418310626054E+00
+    c = - 0.6626458266981849E-01
+
+    a = (1 - 2 * l)
+    
+    r1s = r0s + p * h * v0s
+    v1s = v0s + a * 0.5 * h * dv_dt(r1s, G, masses)
+    r2s = r1s + c * h * v1s
+    v2s = v1s + l * h * dv_dt(r2s, G, masses)
+    r3s = r2s + (1 - 2*(c + p)) * h * v2s
+    v3s = v2s + l * h * dv_dt(r3s, G, masses)
+    r4s = r3s + c * h * v3s
+    v4s = v3s + a * 0.5 * h * dv_dt(r4s, G, masses)
+    r5s = r4s + p * h * v4s
+    
+    return r5s, v4s
     
 
 def RK4Step(r0s, v0s, h, G, masses):

@@ -40,20 +40,19 @@ def Force(rs, G, masses):
     output: - Fs: 3D forces acting on each particle
     '''
     
+    N = len(rs)
+
     Fs = np.zeros_like(rs).astype('float64') # empty vector of forces 
-    
-    for i, r in enumerate(rs): # loop over all particles
-        Fs[i] = Force_i(rs, i, G, masses) # calculate force acting on that particle
+
+    for i in range(N):
+        for j in range(i+1, N):
+            rij = rs[j] - rs[i]
+            rij_mag = np.linalg.norm(rij)
+            F = masses[i] * masses[j] * (rij) / (rij_mag ** 3)
+            Fs[i] += F
+            Fs[j] += - F
         
-    return Fs
-
-def dri_dt(vs, i): 
-    '''Returns the r-derivative of particle i'''
-    return vs[i]
-
-def dvi_dt(rs, i, G, masses):
-    '''Returns the second r-derivative (accelation) of particle i, from F = ma'''
-    return Force_i(rs, i, G, masses) / masses[i]
+    return G * Fs
 
 def dr_dt(vs):
     '''Returns the r-derivative of all particles'''
@@ -61,8 +60,18 @@ def dr_dt(vs):
 
 def dv_dt(rs, G, masses):
     '''Returns the second r-derivative (acceleration) of all particles, from F = ma'''
-    Fs = Force(rs, G, masses)
-    return np.divide(Fs, masses[:, np.newaxis])
+    N = len(rs)
+
+    Fs = np.zeros_like(rs).astype('float64') # empty vector of forces 
+
+    for i in range(N):
+        for j in range(i+1, N):
+            rij = rs[j] - rs[i]
+            F = (rij) / (np.linalg.norm(rij) ** 3)
+            Fs[i] += F * masses[j]
+            Fs[j] += - F * masses[i]
+        
+    return G * Fs
 
 def w_to_vec(w):
     ''' Transforms flat 1D vector to position and velocity vectors'''
@@ -162,8 +171,21 @@ def KineticEnergy(vs, masses):
     output: - kes: kinetic energies
     '''
         
-    kes = [KE(vs, i, masses) for i in range(len(masses))]
-    return np.array(kes)
+    ke = 0.5 * masses.T @ np.array([np.linalg.norm(v) ** 2  for v in vs])
+    return ke
+
+def TotalKE(vs, masses):
+    '''
+    Total kinetic of system E_k = 1/2 * m * v^2
+    
+    input: - vs:     velocity of each particle
+           - i:      particle to find force on
+           - masses: mass of each particle      
+           
+    output: - kes: kinetic energies
+    '''
+    ke = 0.5 * masses.T @ np.array([np.linalg.norm(v) ** 2  for v in vs])
+    return ke
 
 def PE(rs, i, G, masses):
     '''
@@ -185,11 +207,6 @@ def PE(rs, i, G, masses):
             Uij = masses[i] * masses[j] / np.linalg.norm(rj - ri)
             U += Uij 
 
-    # f_mag = np.linalg.norm(Force_i(rs, i, G, masses))
-    # r_mag = np.linalg.norm(rs[i])
-    
-    # U = - f_mag * r_mag
-
     return - G * U
 
 def PotentialEnergy(rs, G, masses):
@@ -203,40 +220,32 @@ def PotentialEnergy(rs, G, masses):
     output: - pe: potential energy
     '''
 
-    pes = [PE(rs, i, G, masses) for i in range(len(masses))]
+    N = len(rs)
 
-    return np.array(pes) / 2
-
-# def EnergyError(ke_traj, pe_traj):
-#     '''
-#     Relative change in energy of the system over time, as a percentage of initial energy
-    
-#     input: - ke_traj: trajectory of kinetic energies of each particle
-#            - pe_traj: trajectory of postential energies of each particle
-           
-#     output: - dE:      trajectory of energy difference from initial energy
-#             - ke_traj: scaled kinetic energy trajectory 
-#             - pe_traj: scaled potential energy trajectory 
-#     '''
-    
-#     total_ke = np.sum(ke_traj, axis = 1) # total kinetic energy of system
-#     total_pe = np.sum(pe_traj, axis = 1) # total potential energy of system
-#     Et = total_ke + total_pe # total energy of system
-#     E0 = Et[0] # initial energy 
-#     E0hat = E0 # scaling coefficient 
-    
-#     ## conditions to avoid dividing by zero 
-#     if E0hat == 0: E0hat = np.max(np.abs(kes[0]+pes[0])) 
-#     if E0hat == 0: E0hat = np.max(np.abs(kes[0]))
-#     if E0hat == 0: E0hat = np.max(np.abs(pes[0]))
-#     if E0hat == 0: E0hat = 1
+    pes = [PE(rs, i, G, masses) for i in range(N)]
         
-#     # scale change in energy accross total, kinetic and potential energies 
-#     dE = (Et - E0) / np.abs(E0hat)
-#     kes = (total_ke - total_ke[0]) / np.abs(E0hat)
-#     pes = (total_pe - total_pe[0]) / np.abs(E0hat)
+    return pes / 2
+
+def TotalPE(rs, G, masses):
+    '''
+    Total potential energy of each particle. E_p = - ||F_i|| * ||r_i||
     
-#     return dE, kes, pes
+    input: - rs:     position of each particle
+           - G:      gravitational constant
+           - masses: mass of each particle      
+           
+    output: - pe: potential energy
+    '''
+
+    N = len(rs)
+
+    U = 0
+
+    for i in range(N):
+        for j in range(i+1, N):
+            U += masses[i] * masses[j] / np.linalg.norm(rs[j] - rs[i])
+        
+    return - G * U
 
 def RelativeEnergy(E_traj):
     '''
@@ -258,10 +267,13 @@ def RelativeEnergy(E_traj):
     
     return dE * 100
 
-def TotalEnergy(rs, vs, G, masses):
+def Energies(rs, vs, G, masses):
     ke = KineticEnergy(vs, masses)
     pe = PotentialEnergy(rs, G, masses)
     return ke + pe
+
+def TotalEnergy(rs, vs, G, masses):
+    return TotalKE(vs, masses) + TotalPE(rs, G, masses)
 
 # ============================
 #      Angular Momentum
