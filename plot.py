@@ -76,7 +76,7 @@ def plot2D(trajectories, masses, scheme='', style = 'default', COM = True):
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Percentage error')
 
-def PlotOrbits(trajectories):
+def PlotOrbits(trajectories, figsize = (7,7)):
     t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
     N = rs_traj.shape[1] # number of masses in the system
 
@@ -84,7 +84,7 @@ def PlotOrbits(trajectories):
     
     plt.style.use('default')
 
-    fig, ax = plt.subplots(1, 1, figsize=(7,7))
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # loop over all masses 
     for i in range(N):
@@ -127,6 +127,32 @@ def PlotEnergy(trajectories):
     ax.set_xlabel('Time', fontsize = 12)
     ax.set_ylabel('Relative Energy Error (%)', fontsize = 12)
 
+    plt.tight_layout()
+
+def PlotTotalEnergy(trajectories, figsize = (7,7)):
+    t_traj, rs_traj, vs_traj, E_traj, am_traj, time = trajectories
+
+    ### ENERGY ###
+    
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    
+    ax.plot(t_traj, E_traj, label = 'Total Energy')
+    
+    ax.set_xlabel('Time', fontsize = 12)
+    ax.set_ylabel('Relative Energy Error (%)', fontsize = 12)
+
+    plt.tight_layout()
+
+def PlotPath(path, figsize = (7,7)):
+
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
+    
+    ax.plot(path[:,0], path[:,1], label = 'Total Energy', color = 'navy')
+    
+    ax.set_xlabel(r'$x1$', fontsize = 12)
+    ax.set_ylabel(r'$x2$', fontsize = 12)
+
+    ax.set_aspect('equal')
     plt.tight_layout()
 
 
