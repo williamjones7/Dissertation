@@ -283,18 +283,18 @@ def NStepsSolver(NSteps, C, r0s, v0s, G, masses, hlim = 1e-6, Elim = 0.01, h0 = 
         E = TotalEnergy(rs, vs, G, masses) # Calculate Energy 
         relE = np.abs((E - E0) / E0hat)
 
-        if h_new < hlim: 
-            stability = 2
-            break 
+        # if h_new < hlim: 
+        #     stability = 2
+        #     break 
         if totalSteps > NSteps: 
             stability =  1
             break 
-        if relE > Elim:
-            stability = 3
-            break 
-        if maxDist(rs) > 10:
-            stability = 0
-            break 
+        # if relE > Elim:
+        #     stability = 3
+        #     break 
+        # if maxDist(rs) > 10:
+        #     stability = 0
+        #     break 
         
         t += h_new
 
